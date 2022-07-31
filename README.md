@@ -1,7 +1,7 @@
 # DataGenerator
 App that generates random data files of different format. Used to generate data for debugging programs.
 
->Installation guide
+>Installation (from the source code) guide
 
 	Install pyinstaller (`pip install -U pyinstaller`)
 	
