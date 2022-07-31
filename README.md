@@ -9,7 +9,7 @@ App that generates random data files of different format. Used to generate data 
 	
 	`pyinstaller -F -w -i "icon.ico" DataGenerator.py`
 	
-	!icon.ico file and .py file must be in the same folder, otherwise use absolute path!
+	!logo.gif, icon.ico and .py file must be in the same folder, otherwise use absolute path!
 
 > installation from the .zip archive
 
