@@ -11,7 +11,7 @@ App that generates random data files of different format. Used to generate data 
 	
 	!icon.ico file and .py file must be in the same folder, otherwise use absolute path!
 
-> installation form the .zip archive
+> installation from the .zip archive
 
 	unextract the archive
 	
