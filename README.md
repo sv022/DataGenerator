@@ -15,4 +15,4 @@ App that generates random data files of different format. Used to generate data 
 
 	unextract the archive
 	
-	!logo.gif and the executable must always be in one folder!
+	!logo.gif, icon.ico and the executable must always be in one folder!
