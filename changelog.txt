@@ -1,0 +1,6 @@
+added:
+  - working directory is now saved when closing the app
+  - changed the app logo in the task bar
+  - added cool kompege logo
+  - added link to my VK page in the start window ;)
+

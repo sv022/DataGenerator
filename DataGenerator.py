@@ -1,10 +1,15 @@
 import tkinter as tk
 from tkinter import IntVar
 from tkinter import ttk
+from tkinter import PhotoImage
+from PIL import Image, ImageTk
 from random import *
 import tkinter.filedialog as fd
 from os import getcwd
 from time import time
+import webbrowser
+import ctypes
+
 # colors and fonts 
 
 roboto6 = ('roboto', '6')
@@ -17,22 +22,36 @@ roboto18 = ('roboto', '18')
 
 colorsdict = {'gray' : '#e7edf9', 'green' : '#00c3a3', 'darkgreen' : '#004a46', 'lightgray' : '#8f8f9d', 'darkblue' : '#1e325a', 
               'lightblue' : '#63a8e4'}
-
-d = getcwd() # current directory
+# current directory
+try:
+    fdir = open('dir.txt', 'r')
+    d = fdir.read()
+    if not(d):
+        raise Exception
+except Exception:
+    fdir = open('dir.txt', 'w+')
+    d = getcwd()
+    fdir.write(d)
+    fdir.close()
 
 def Dataselection(*args):
-    global datatype, startlabel, mainpanel, miscpanel, filenameent, genbutton, cdirlabel
+    global datatype, startlabel, mainpanel, miscpanel, filenameent, genbutton, cdirlabel, me
     
     # --- misc / main panel gui ---
+    
     try:
         startlabel.destroy()
+        me.destroy()
         mainpanel.destroy()
     except NameError:
         pass
+
     mainpanel = tk.Frame(main, height=460, width=620, background='white')
     genbutton = tk.Button(main, text='Создать', width=16, height=2, background=colorsdict['green'], activebackground=colorsdict['green'], 
                           bd=0, relief='flat', font=roboto16, foreground=colorsdict['darkgreen'], activeforeground=colorsdict['darkgreen'])
     #tk.Label(main, text='Создать', font=roboto12, foreground=colorsdict['darkgreen']).place(x=650, y=460)
+    
+    # directory selection / file name
     miscpanel = tk.Frame(main, background='white', height=430, width=200)
     miscpanel.place(x=640, y=15)
     tk.Frame(miscpanel, background=colorsdict['darkblue'], height=50, width=miscpanel['width']).place(x=0, y=0)
@@ -44,6 +63,13 @@ def Dataselection(*args):
     dirselect = tk.Button(miscpanel, text='Выбор папки', command=dirpick, relief='flat', activebackground='white', background='white', borderwidth=0)
     tk.Label(miscpanel, text='Текущая директория:', background='white', font=roboto8).place(x=5, y=120)
     cdirlabel = tk.Label(miscpanel, text=d, background='white', font=roboto8, foreground='gray')
+    if len(d) > 35:
+        cdirlabel['font'] = roboto7
+    if len(d) > 45:
+        cdirlabel['font'] = roboto6
+    
+    # EGE logo
+    tk.Label(miscpanel, image=logo, borderwidth=0).place(x=5, y=7)
     
     mainpanel.place(x=10, y=70)
     genbutton.place(x=641, y=460)
@@ -70,12 +96,12 @@ def Datatype1():
         else:
             fname = filenameent.get()
         f = open(f'{d}/{fname}.txt', 'w+')
-        def err():
+        def err(): # error message
             errmsg = tk.Label(mipanel, text='Неправильный диапазон / значения!', background='white', font=roboto12, foreground='red')
             errmsg.place(x=310, y=170)
             errmsg.after(600, lambda: errmsg.destroy())
             f.close()
-        def writelines(nums, ncheck):
+        def writelines(nums, ncheck): 
             for x in uicontent:
                 f.write(x.get() + '\n')
             if ncheck == 1:
@@ -85,6 +111,8 @@ def Datatype1():
                     n = list(map(int, uicontent[0].get().split()))[0]
             else:
                 n = int(nentry.get())
+            
+            # this is in fact faster than using a for loop
             if len(nums) == 1:
                 for _ in range(n):
                     f.write(f'{randint(nums[0][0], nums[0][1])}\n')
@@ -139,7 +167,7 @@ def Datatype1():
         uipanel.place(x=0, y=115)
         uicontent = [None] * linescount
         
-        for i in range(linescount):
+        for i in range(linescount): # unique lines input
             tk.Frame(uipanel, background=colorsdict['lightgray'], height=19, width=304).place(x=94, y=i*30 + 2)
             tk.Label(uipanel, text=f'Строка {i + 1}', font=roboto12, background='white').place(x=5, y=i*30)
             uicontent[i] = tk.Entry(uipanel, width=50, relief='flat', borderwidth=0)
@@ -154,7 +182,7 @@ def Datatype1():
         pos2 = [33, 80, 132]
         rangelbtext = ['Диапазон значений:', 'Диапазон значений 2 элемента:', 'Диапазон значений 3 элемента:']
         
-        for i in range(numsperline):
+        for i in range(numsperline): # random numbers range entries
             if i == 0:
                 range1label = tk.Label(mipanel, text=rangelbtext[i], font=roboto12, background='white')
                 range1label.place(x=5, y=5)
@@ -171,12 +199,11 @@ def Datatype1():
                 rangeentrieslist[i] = rangeentry
                 rangeentrieslist[i].place(x=80, y=pos2[i])
 
-        varent = IntVar()
+        varent, varmerge  = IntVar(), IntVar()
         varent.set(1)
-        varmerge = IntVar()
         varmerge.set(1)
         
-        def show():
+        def show(): # number of lines if mark is unchecked
             global nentry, nlabel, nframe
             if varent.get() == 1:
                 try:
@@ -193,7 +220,7 @@ def Datatype1():
                 nentry.place(x=210, y=200)
                 nlabel.place(x=15, y=200)
         
-        def merge():
+        def merge(): # separate ranges for random elements
             if varmerge.get() == 1:
                 try:
                     range1label['text'] = 'Диапазон значений:'
@@ -228,8 +255,6 @@ def Datatype1():
     one = tk.Radiobutton(mainpanel, text='одно число', variable=linestrack, value=1, background='white', font=roboto8)
     two = tk.Radiobutton(mainpanel, text='пары чисел', variable=linestrack, value=2, background='white', font=roboto8)
     three = tk.Radiobutton(mainpanel, text='тройки чисел', variable=linestrack, value=3, background='white', font=roboto8)
-    
-    # --- specified datatype gui placing ---
     
     tk.Label(mainpanel, text='(не более 3)', font=roboto8, background='white').place(x=400, y=8)
     tk.Label(mainpanel, text='Количество уникальных строк', font=roboto12, background='white').place(x=15, y=5)
@@ -339,17 +364,15 @@ def Datatype2():
     
     # variables
     codenames = ('LU', 'LL', 'CU', 'CL', 'N', 'CS')
-    
     alp = {'LU' : [x for x in'ABCDEFGHIJKLMNOPQRSTUVWXYZ'], 'LL': [x for x in 'abcdefghijklmnopqrstuvwxyz'],
            'CU': [x for x in 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'], 'CL': [x for x in 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'],
            'N': [x for x in '0123456789']}
-    
     alpvars = {}
     for x in codenames:
         alpvars[x] = IntVar()
         alpvars[x].set(0)
+        
     # alplabet checkbuttons
-    
     latinuppercb = tk.Checkbutton(mainpanel, text='Латинский алфавит, заглавные буквы (A-Z)', font=roboto10, background='white', 
                                   activebackground='white', onvalue=1, offvalue=0, variable=alpvars['LU'])
     latinlowercb = tk.Checkbutton(mainpanel, text='Латинский алфавит, строчные буквы (a-z)', font=roboto10, background='white', 
@@ -386,12 +409,15 @@ def Datatype2():
     lengthentry = tk.Entry(mainpanel, width=20, relief='flat', borderwidth=0)
     lengthentry.place(x=40, y=350)
 
-def dirpick():
+def dirpick(): # select directory
     global d
     dt = fd.askdirectory(title='Выбор папки', initialdir=d)
     if dt: d = dt
     cdirlabel['text'] = d
     cdirlabel['font'] = roboto8
+    fdir = open('dir.txt', 'w')
+    fdir.write(d)
+    fdir.close()
     if len(d) > 35:
         cdirlabel['font'] = roboto7
     if len(d) > 45:
@@ -404,19 +430,23 @@ main = tk.Tk()
 datatypelb = tk.Label(main, text='Тип данных', font=roboto16, background='#e7edf9')
 datatype = ttk.Combobox(main, state='readonly', values=['Набор чисел из N строк', 'Строка из N символов'], width=50)
 datatype.bind("<<ComboboxSelected>>", Dataselection)
-startlabel = tk.Label(text='Выберите тип данных, чтобы начать работу', background='#e7edf9', font=roboto18)
+startlabel = tk.Label(text='Выберите тип данных, чтобы начать работу', background=colorsdict['gray'], font=roboto18)
+me = tk.Label(text='→ Создатель приложения', background=colorsdict['gray'], foreground=colorsdict['darkblue'], font=roboto16, cursor='hand2')
 
-
+logo = ImageTk.PhotoImage(Image.open("logo.gif"))
 datatypelb.place(y=25, x=30)
 datatype.place(x=175, y=30)
 startlabel.place(x=200, y=230)
-
+me.place(x=310, y=290)
+me.bind("<Button-1>", lambda e: webbrowser.open_new(r"https://vk.com/sv022"))
 
 main.title('EGE Data Generator')
 main.geometry('850x550+300+200')
 main.configure(background=colorsdict['gray'])
 main.resizable(False, False)
 main.config()
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('string')
+main.iconbitmap('icon.ico')
 
 main.mainloop()
 
